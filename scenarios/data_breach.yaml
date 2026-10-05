@@ -1,0 +1,68 @@
+# Not a launch: a news event. A bank discloses a data breach; outrage spreads, a boycott call
+# circulates, a viral exaggeration claims "all passwords leaked", the bank apologises.
+name: bank_data_breach
+
+simulation:
+  hours: 240
+  start_hour_of_day: 18
+  seed: 7
+
+population:
+  size: 1000000
+  segments:
+    - name: customers
+      share: 0.12
+      baseline_opinion: 0.3
+      can_adopt: false
+      traits: {trust_brand: 0.6}
+    - name: privacy_activists
+      share: 0.03
+      baseline_opinion: -0.3
+      traits: {expressiveness: 0.25, reactivity: 0.65}
+    - name: general_public
+      share: 0.85
+      baseline_opinion: 0.05
+
+network:
+  mean_degree: 12
+  homophily: 0.75
+
+narratives:
+  - id: breach_disclosure
+    kind: news
+    valence: -0.6
+    credibility: 0.85
+    emotionality: 0.7
+    start: 0
+    seed: {target: active, share: 0.0002}
+    media:
+      - {start: 0, end: 30, intensity: 0.07}
+
+  - id: all_passwords_leaked
+    kind: rumor
+    truth: false
+    valence: -0.9
+    credibility: 0.3
+    emotionality: 0.95
+    start: 8
+    seed: {target: segment:privacy_activists, count: 300}
+    media_pickup: {threshold: 0.02, delay: 4, duration: 24, intensity: 0.03}
+
+  - id: boycott_call
+    kind: rumor
+    valence: -0.5
+    credibility: 0.5
+    emotionality: 0.8
+    start: 20
+    seed: {target: segment:privacy_activists, count: 500}
+
+  - id: ceo_apology
+    kind: debunk
+    debunks: all_passwords_leaked
+    valence: 0.35
+    credibility: 0.55
+    emotionality: 0.3
+    start: 30
+    seed: {target: influencers, count: 50}
+    media:
+      - {start: 30, end: 54, intensity: 0.05}

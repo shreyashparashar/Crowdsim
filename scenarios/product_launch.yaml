@@ -1,0 +1,92 @@
+# Smartphone launch. Hour 0 = launch day, 9 AM. A false battery-fire rumor appears on day 2,
+# the press may pick it up, the company denies it on day 3, buyers start posting reviews.
+name: phone_launch_with_rumor
+
+simulation:
+  hours: 336              # 14 days
+  start_hour_of_day: 9
+  seed: 42
+
+population:
+  size: 1000000
+  segments:
+    - name: loyal_customers       # already own the brand
+      share: 0.08
+      baseline_opinion: 0.55
+      opinion_sd: 0.2
+      can_adopt: true
+      need: 0.6
+      price_sensitivity: 0.35
+      traits: {trust_brand: 0.75}
+    - name: prospects             # in the market for a phone
+      share: 0.22
+      baseline_opinion: 0.05
+      can_adopt: true
+      need: 0.65
+      price_sensitivity: 0.55
+    - name: competitor_fans       # loyal to a rival
+      share: 0.15
+      baseline_opinion: -0.35
+      can_adopt: true
+      need: 0.35
+      price_sensitivity: 0.5
+      traits: {trust_brand: 0.3, expressiveness: 0.12}
+    - name: general_public        # non-consumers: won't buy, still talk and judge
+      share: 0.55
+      baseline_opinion: 0.0
+      opinion_sd: 0.2
+      can_adopt: false
+      activity: 0.8
+
+network:
+  mean_degree: 12
+  local_fraction: 0.65
+  community_size: 150
+  homophily: 0.8
+  influencer_share: 0.001
+
+product:
+  quality: 0.3            # how good it really is (-1..1); drives reviews from actual buyers
+
+narratives:
+  - id: launch
+    kind: official
+    valence: 0.6
+    credibility: 0.8
+    emotionality: 0.5
+    start: 0
+    seed: {target: influencers, count: 300}
+    media:
+      - {start: 0, end: 12, intensity: 0.08}
+      - {start: 24, end: 48, intensity: 0.03}
+
+  - id: battery_rumor
+    kind: rumor
+    truth: false
+    valence: -0.8
+    credibility: 0.35
+    emotionality: 0.9
+    start: 30
+    seed: {target: active, share: 0.0006}   # share = fraction of population; or use count
+    media_pickup: {threshold: 0.01, delay: 3, duration: 36, intensity: 0.04}
+
+  - id: company_denial
+    kind: debunk
+    debunks: battery_rumor
+    valence: 0.3
+    credibility: 0.6
+    emotionality: 0.25
+    start: 60
+    seed: {target: influencers, count: 100}
+    media:
+      - {start: 60, end: 84, intensity: 0.05}
+
+  - id: tech_review_praise
+    kind: news
+    valence: 0.5
+    credibility: 0.75
+    emotionality: 0.35
+    start: 72
+    seed: {target: active, count: 150}
+    media:
+      - {start: 72, end: 96, intensity: 0.03}
